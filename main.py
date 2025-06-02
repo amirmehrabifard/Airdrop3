@@ -20,10 +20,14 @@ def home():
 # مسیر اصلی برای دریافت آپدیت‌های تلگرام
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    json_data = request.get_json()
-    if json_data:
+    try:
+        json_data = request.get_json()
+        if json_data is None:
+            return "❌ Error: No JSON data received", 400
         bot.process_new_updates([telebot.types.Update.de_json(json_data)])
-    return "OK", 200
+        return "✅ OK", 200
+    except Exception as e:
+        return f"❌ Internal Server Error: {str(e)}", 500
 
 # ذخیره اطلاعات کاربران
 DATA_FILE = "users.json"
@@ -85,8 +89,3 @@ def claim_tokens(message):
 # اجرای برنامه روی پورت صحیح
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=PORT)
-# Updated for redeploy
-# Updated for redeploy
-# Updated for redeploy
-# Updated for redeploy
-# Updated for redeploy
