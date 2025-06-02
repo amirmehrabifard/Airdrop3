@@ -24,10 +24,19 @@ def webhook():
         json_data = request.get_json()
         if json_data is None:
             return "❌ Error: No JSON data received", 400
+        
+        # نمایش داده دریافتی برای بررسی خطاها
+        print(f"📌 Received data: {json_data}")  
+
+        # بررسی اعتبار داده دریافتی و جلوگیری از خطاهای پردازش
+        if "message" not in json_data:
+            return "❌ Error: Invalid data format", 400
+
         bot.process_new_updates([telebot.types.Update.de_json(json_data)])
         return "✅ OK", 200
     except Exception as e:
-        return f"❌ Internal Server Error: {str(e)}", 500
+        print(f"❌ Webhook Error: {e}")  # نمایش جزئیات خطای داخلی در لاگ‌ها
+        return f"❌ Internal Server Error: {e}", 500
 
 # ذخیره اطلاعات کاربران
 DATA_FILE = "users.json"
@@ -45,46 +54,6 @@ def save_users(users):
     """ ذخیره اطلاعات کاربران در JSON """
     with open(DATA_FILE, "w", encoding="utf-8") as file:
         json.dump(users, file, indent=4)
-
-# مدیریت عضویت و پاداش
-@bot.message_handler(commands=["start"])
-def send_welcome(message):
-    users = load_users()
-    user_id = str(message.chat.id)
-
-    if user_id not in users:
-        users[user_id] = {"tokens": 500}  # پاداش اولیه عضویت
-        save_users(users)
-        bot.reply_to(message, "🚀 خوش آمدید! ۵۰۰ توکن به حساب شما اضافه شد.")
-    else:
-        bot.reply_to(message, "✅ شما قبلاً عضو شده‌اید!")
-
-# سیستم ارجاع کاربران
-@bot.message_handler(commands=["invite"])
-def invite_user(message):
-    users = load_users()
-    user_id = str(message.chat.id)
-
-    referral_link = f"https://t.me/{bot.get_me().username}?start={user_id}"
-    bot.reply_to(message, f"🔗 لینک دعوت اختصاصی شما: {referral_link}")
-
-@bot.message_handler(commands=["claim"])
-def claim_tokens(message):
-    users = load_users()
-    user_id = str(message.chat.id)
-
-    if len(message.text.split()) > 1:
-        inviter_id = message.text.split()[1]
-        if inviter_id in users and user_id not in users:
-            users[user_id] = {"tokens": 500}
-            users[inviter_id]["tokens"] += 100  # پاداش دعوت
-            save_users(users)
-            bot.reply_to(message, "✅ عضویت شما موفق بود! ۵۰۰ توکن دریافت کردید.")
-            bot.send_message(inviter_id, "🎉 یک کاربر جدید دعوت شد! ۱۰۰ توکن به حساب شما اضافه شد.")
-        else:
-            bot.reply_to(message, "❌ لینک دعوت معتبر نیست.")
-    else:
-        bot.reply_to(message, "❌ لطفاً لینک دعوت را همراه دستور ارسال کنید.")
 
 # اجرای برنامه روی پورت صحیح
 if __name__ == "__main__":
