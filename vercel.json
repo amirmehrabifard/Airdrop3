@@ -1,14 +1,1 @@
-{
-  "version": 2,
-  "routes": [
-    {
-      "src": "/webhook",
-      "methods": ["POST"],
-      "dest": "main.py"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "main.py"
-    }
-  ]
-}
+
