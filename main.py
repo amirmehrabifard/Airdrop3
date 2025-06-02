@@ -90,3 +90,4 @@ def claim_tokens(message):
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=PORT)
 # Redeploy update - تغییر کوچک برای اجرای دیپلوی مجدد
+# Redeploy triggered with new BOT_TOKEN
